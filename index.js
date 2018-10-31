@@ -1,6 +1,7 @@
 'use strict'
 
-const { MongoClient } = require('mongodb')
+//const { MongoClient } = require('mongodb')
+const mongoose = require('mongoose')
 const api = require('./api')
 const body = require('body-parser')
 const co = require('co')
@@ -11,14 +12,14 @@ const dev = process.env.NODE_ENV !== 'production'
 const app = next({ dev })
 const handle = app.getRequestHandler()
 
-const MONGO_URL = 'mongodb://localhost:27017/test'
+const MONGO_URL = 'mongodb://playpbnow-dev:playn0w123@ds133252.mlab.com:33252/playpbnow-development'
 const PORT = 3000
 
 co(function * () {
   yield app.prepare()
 
   console.log(`Connecting to ${MONGO_URL}`)
-  const db = yield MongoClient.connect(MONGO_URL)
+  const db = yield mongoose.connect(MONGO_URL)
 
   const server = express()
 

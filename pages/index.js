@@ -13,7 +13,8 @@ import Footer from '../components/Footer'
 import moment from 'moment'
 import Link from "next/link";
 import Head from "next/head";
-     
+import fetch from 'isomorphic-unfetch'
+
 const AddPlayerButton = props => (
     <Button as='div' labelPosition='left'>
       <Label as='a' basic pointing='right'>
@@ -38,8 +39,21 @@ const AddPlayerButton = props => (
 export default class Index extends Component {
 
   static async getInitialProps({ req }) {
-    const userAgent = req ? req.headers['user-agent'] : navigator.userAgent
-    return { userAgent }
+    //const res = await fetch('https://api.github.com/repos/zeit/next.js')
+    //const json = await res.json()
+    //return { stars: json.stargazers_count }
+
+
+    if (req) {
+      const { db } = req
+      const Place = require('../api/Place')
+      const list = await Place.find()
+      return { list }
+    }
+
+    const { list } = await superagent.get('http://localhost:3000/api')
+      .then(res => res.body)
+    return { list }
   }
 
   state = {
@@ -79,7 +93,7 @@ export default class Index extends Component {
           />
         </Head>
         <Segment style={{ padding: '8em 0em' }} vertical>
-          
+
 
           <Grid container stackable verticalAlign='middle'>
             <Grid.Row>
@@ -98,7 +112,7 @@ export default class Index extends Component {
                         <List.Content>
                           <List.Header as='a'>{schedule.place ? schedule.place.title : ""}</List.Header>
                           {moment(schedule.datetimefrom).format("ddd, hA")} - {moment(schedule.datetimeto).format("hA")}
-                        </List.Content>            
+                        </List.Content>
                       </List.Item>
                     )}
                   )}
