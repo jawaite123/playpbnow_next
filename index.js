@@ -1,10 +1,5 @@
-'use strict'
-
-//const { MongoClient } = require('mongodb')
 const mongoose = require('mongoose')
 const api = require('./api')
-const body = require('body-parser')
-const co = require('co')
 const express = require('express')
 const next = require('next')
 
@@ -15,25 +10,24 @@ const handle = app.getRequestHandler()
 const MONGO_URL = 'mongodb://playpbnow-dev:playn0w123@ds133252.mlab.com:33252/playpbnow-development'
 const PORT = 3000
 
-co(function * () {
-  yield app.prepare()
+app.prepare()
+  .then(() => {
+    const server = express();
 
-  console.log(`Connecting to ${MONGO_URL}`)
-  const db = yield mongoose.connect(MONGO_URL)
+    mongoose.connect(MONGO_URL,  { useNewUrlParser: true })
 
-  const server = express()
+    server.use("/api", api);
 
-  server.use(body.json())
-  server.use((req, res, next) => {
-    req.db = db
-    next()
+    server.get("*", (req, res) => {
+      return handle(req, res);
+    });
+
+    server.listen(PORT, err => {
+      if (err) throw err;
+      console.log(`> Ready on ${PORT}`);
+    });
   })
-  server.use('/api', api(db))
-
-  server.get('*', (req, res) => {
-    return handle(req, res)
-  })
-
-  server.listen(PORT)
-  console.log(`Listening on ${PORT}`)
-}).catch(error => console.error(error.stack))
+  .catch(ex => {
+    console.error(ex.stack);
+    process.exit(1);
+  });

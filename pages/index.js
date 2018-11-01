@@ -18,14 +18,14 @@ import fetch from 'isomorphic-unfetch'
 const AddPlayerButton = props => (
     <Button as='div' labelPosition='left'>
       <Label as='a' basic pointing='right'>
-        {playerCount}
+        {props.playerCount}
       </Label>
       <Button icon onClick={ () => {
         if(props.isLoggedIn) {
           addPlayer({ variables: {scheduleId: props.schedule._id} })
         } else {
         //  this.setState({showLoginModal: true})
-        props.showLoginModal()
+          props.showLoginModal()
 
         }
         }} >
@@ -38,24 +38,6 @@ const AddPlayerButton = props => (
 
 export default class Index extends Component {
 
-  static async getInitialProps({ req }) {
-    //const res = await fetch('https://api.github.com/repos/zeit/next.js')
-    //const json = await res.json()
-    //return { stars: json.stargazers_count }
-
-
-    if (req) {
-      const { db } = req
-      const Place = require('../api/Place')
-      const list = await Place.find()
-      return { list }
-    }
-
-    const { list } = await superagent.get('http://localhost:3000/api')
-      .then(res => res.body)
-    return { list }
-  }
-
   state = {
     isLoggedIn: false,
     showLoginModal: false,
@@ -63,7 +45,11 @@ export default class Index extends Component {
     schedules: []
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    const schedules = await fetch('http://localhost:3000/api/places')
+      .then(res => res.body)
+      console.log(schedules)
+    this.setState(schedules)
     let token = localStorage.getItem('token')
     if(token) this.setState({isLoggedIn: true})
   }
@@ -83,7 +69,7 @@ export default class Index extends Component {
 
     const { isLoggedIn, email, showLoginModal, schedules } = this.state
 
-    console.log('isLoggedIn: ', isLoggedIn)
+
     return (
       <ResponsiveContainer>
         <Head>
@@ -103,6 +89,7 @@ export default class Index extends Component {
               <Grid.Column floated='right' width={8}>
                 <List divided verticalAlign='middle'>
                   {schedules.map(schedule => {
+                    console.log(schedule)
                     return (
                       <List.Item key={schedule._id}>
                         <List.Content floated='right'>
